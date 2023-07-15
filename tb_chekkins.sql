@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS Cliente(
 	cedula int not NULL,
 	nombre varchar (30),
-	whatsaap varchar(13),
+	whatsapp varchar(13),
 	email varchar(50),
 	primary key(cedula)
 )
