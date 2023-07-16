@@ -8,14 +8,14 @@ CREATE TABLE IF NOT EXISTS Cliente(
 )
 
 CREATE TABLE IF NOT EXISTS Pedido(
-	num_pedido int not NULL,
+	num_pedido serial not NULL,
 	cant_hambur int,
 	monto_delivery decimal(2,2),
 	total_pagar decimal (3,2),
 	modo_pago varchar (10),
 	sreen_pago bytea,
-	status varchar (12),
-	fecha_hora timestamp,
+	status varchar (12) NOT NULL DEFAULT 'pending',
+	fecha_hora timestamp NOT NULL DEFAULT now(),
 	ciudad varchar (15),
 	municipio varchar(15),
 	observacion text,
