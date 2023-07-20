@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from psycopg2 import extras
 from conexion_BD import connection
+import datetime
 
 app = Flask(__name__)
 
@@ -67,6 +68,7 @@ def update_customers(cedula):
 
 @app.route("/orders", methods=["POST"])
 def orders():
+    prec_hamb = 5
     new_order = request.get_json()
     cant_hambur = new_order["quanty"]
     modo_pago = new_order["paymet_method"]
@@ -76,11 +78,33 @@ def orders():
     cedula = new_order["cedula"]
     con = connection()
     cur = con.cursor(cursor_factory=extras.RealDictCursor)
+
+    if municipio != "maneiro":
+        monto_delivery = 2.00
+    else:
+        monto_delivery = 0.00
+
+    total = (int(cant_hambur) * prec_hamb) + monto_delivery
+
+    fe_ho_actu = datetime.datetime.now()
+    fecha_hora = datetime.datetime.strftime(fe_ho_actu, "%d-%m-%Y %H:%M:%S")
+    print(fecha_hora)
     cur.execute(
-        "INSERT INTO Pedido (cant_hambur,modo_pago,observacion,ciudad,municipio,ced_cliente) VAlUES (%s,%s,%s,%s,%s,%s)  RETURNING * ",
-        (cant_hambur, modo_pago, observacion, ciudad, municipio, cedula),
+        "INSERT INTO Pedido (cant_hambur,modo_pago,observacion,ciudad,municipio,monto_delivery,total_pagar,fecha_hora,ced_cliente ) VAlUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING *",
+        (
+            cant_hambur,
+            modo_pago,
+            observacion,
+            ciudad,
+            municipio,
+            monto_delivery,
+            total,
+            fecha_hora,
+            cedula,
+        ),
     )
-    order = cur.fetchall()
+
+    order = cur.fetchone()
     con.commit()
     cur.close()
     con.close()
