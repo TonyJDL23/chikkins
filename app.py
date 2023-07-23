@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from psycopg2 import extras
 from conexion_BD import connection
 import datetime
@@ -109,6 +109,16 @@ def orders():
     cur.close()
     con.close()
     return jsonify(order)
+
+
+@app.route("/enviar_screenshot", methods=["POST"])
+def enviar_screenshot():
+    pass
+
+
+@app.route("/orders/payment-screenshot")
+def payment_screenshot():
+    return render_template("payment-screenshot.html")
 
 
 if __name__ == "__main__":
