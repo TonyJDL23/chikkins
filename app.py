@@ -1,7 +1,9 @@
 from flask import Flask, jsonify, request, render_template
 from psycopg2 import extras
 from conexion_BD import connection
+from werkzeug.utils import secure_filename
 import datetime
+import os
 
 app = Flask(__name__)
 
@@ -111,14 +113,27 @@ def orders():
     return jsonify(order)
 
 
-@app.route("/enviar_screenshot", methods=["POST"])
+@app.route("/enviar-screenshot")
 def enviar_screenshot():
-    pass
-
-
-@app.route("/orders/payment-screenshot")
-def payment_screenshot():
     return render_template("payment-screenshot.html")
+
+
+# se crea la configuracion para guaradar las imagenes
+app.config["UPLOAD_FOLDER"] = "/screenshot"  # la ruta donde se va a guardar la imagen
+
+ALLOWED_EXTENSIONS = set(["png", "jpg"])  # las extensiones permitidas
+
+
+@app.route("/uploader", methods=["POST"])
+def uploader():
+    if request.method == "POST":
+        fi = request.files["file"]
+        filename = secure_filename(fi.filename)  # type: ignore
+        print(fi)
+        print(filename)
+        return "aqu" + filename
+
+    return "HOLA"
 
 
 if __name__ == "__main__":
