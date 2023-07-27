@@ -4,6 +4,7 @@ from conexion_BD import connection
 from werkzeug.utils import secure_filename
 import datetime
 import os
+from os import path
 
 app = Flask(__name__)
 
@@ -113,27 +114,48 @@ def orders():
     return jsonify(order)
 
 
-@app.route("/enviar-screenshot")
+@app.route("/enviar-screenshot", methods=["GET"])
 def enviar_screenshot():
     return render_template("payment-screenshot.html")
 
 
 # se crea la configuracion para guaradar las imagenes
-app.config["UPLOAD_FOLDER"] = "/screenshot"  # la ruta donde se va a guardar la imagen
+app.config["UPLOAD_IMAG"] = "screenshot"  # la ruta donde se va a guardar la imagen
 
 ALLOWED_EXTENSIONS = set(["png", "jpg"])  # las extensiones permitidas
 
 
-@app.route("/uploader", methods=["POST"])
-def uploader():
-    if request.method == "POST":
-        fi = request.files["file"]
-        filename = secure_filename(fi.filename)  # type: ignore
-        print(fi)
-        print(filename)
-        return "aqu" + filename
+def allowed_file(file):
+    file = file.split(".")
+    if file[1] in ALLOWED_EXTENSIONS:
+        return True
+    return False
 
-    return "HOLA"
+
+@app.route("/orders/<id>/payment-screenshot", methods=["POST"])
+def payment_screenshot(id):
+    file = request.files["screenshot"]
+    filename = secure_filename(file.filename)  # type: ignore
+    if file and allowed_file(filename):
+        print("permitido")
+        extension = path.splitext(filename)[1]
+        new_name = id + extension
+        file.save(os.path.join(app.config["UPLOAD_IMAG"], new_name))
+        # ahora se guarda en la BD
+        con = connection()
+        cur = con.cursor(cursor_factory=extras.RealDictCursor)
+        cur.execute(
+            "UPDATE Pedido SET sreen_pago = %s where num_pedido= %s",
+            (new_name, id),
+        )
+
+        con.commit()
+
+        cur.close()
+        con.close()
+        return new_name
+    else:
+        return jsonify({"message": "No se logro guardar la imagen"})
 
 
 if __name__ == "__main__":

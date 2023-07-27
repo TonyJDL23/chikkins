@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS Pedido(
 	monto_delivery real,
 	total_pagar real,
 	modo_pago varchar (10),
-	sreen_pago bytea,
+	sreen_pago TEXT,
 	status varchar (12) NOT NULL DEFAULT 'pending',
 	fecha_hora varchar(22),
 	ciudad varchar (15),
