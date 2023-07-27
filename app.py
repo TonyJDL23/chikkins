@@ -136,6 +136,7 @@ def allowed_file(file):
 def payment_screenshot(id):
     file = request.files["screenshot"]
     filename = secure_filename(file.filename)  # type: ignore
+
     if file and allowed_file(filename):
         print("permitido")
         extension = path.splitext(filename)[1]

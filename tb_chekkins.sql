@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS Cliente(
 	primary key(cedula)
 )
 
+
 CREATE TABLE IF NOT EXISTS Pedido(
 	num_pedido serial not NULL,
 	cant_hambur int,
