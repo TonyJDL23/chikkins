@@ -159,5 +159,30 @@ def payment_screenshot(id):
         return jsonify({"message": "No se logro guardar la imagen"})
 
 
+@app.route("/orders/<id>/status", methods=["PATCH"])
+def update_status(id):
+    con = connection()
+    cur = con.cursor(cursor_factory=extras.RealDictCursor)
+
+    new_status = request.get_json()
+    estado = new_status["status"]
+
+    cur.execute(
+        "UPDATE Pedido SET status = %s where num_pedido= %s RETURNING *",
+        (estado, id),
+    )
+    update_excelent = cur.fetchone()
+
+    con.commit()
+
+    cur.close()
+    con.close()
+
+    if update_excelent is None:
+        return jsonify({"message": "NO SE LOGRO ACTUALIZAR"})
+
+    return jsonify({"message": "ACTUALIZACION EXITOSA"})
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=4000)
