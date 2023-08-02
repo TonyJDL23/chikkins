@@ -90,7 +90,7 @@ def orders():
     total = (int(cant_hambur) * prec_hamb) + monto_delivery
 
     fe_ho_actu = datetime.datetime.now()
-    fecha_hora = datetime.datetime.strftime(fe_ho_actu, "%d-%m-%Y %H:%M:%S")
+    fecha_hora = datetime.datetime.strftime(fe_ho_actu, "%Y-%m-%d %H:%M:%S")
     print(fecha_hora)
     cur.execute(
         "INSERT INTO Pedido (cant_hambur,modo_pago,observacion,ciudad,municipio,monto_delivery,total_pagar,fecha_hora,ced_cliente ) VAlUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING *",
@@ -182,6 +182,55 @@ def update_status(id):
         return jsonify({"message": "NO SE LOGRO ACTUALIZAR"})
 
     return jsonify({"message": "ACTUALIZACION EXITOSA"})
+
+
+@app.route("/orders", methods=["GET"])
+def List_fecha_status_ced():
+    date = None
+    status = None
+    cedula = None
+    date = request.args.get("date")
+    status = request.args.get("status")
+    cedula = request.args.get("cedula")
+
+    con = connection()
+    cur = con.cursor(cursor_factory=extras.RealDictCursor)
+
+    if cedula != None and status != None and date != None:
+        cur.execute(
+            "SELECT * FROM Pedido WHERE fecha_hora like %s AND status=%s AND ced_cliente=%s",
+            (date + "%", status, cedula),
+        )
+        list_orders = cur.fetchall()
+
+    elif (date != None and cedula != None) and status == None:
+        cur.execute(
+            "SELECT * FROM Pedido WHERE fecha_hora like %s AND ced_cliente=%s",
+            (date + "%", cedula),
+        )
+        list_orders = cur.fetchall()
+
+    elif (cedula != None and status != None) and date == None:
+        cur.execute(
+            "SELECT * FROM Pedido WHERE ced_cliente=%s AND status=%s",
+            (cedula, status),
+        )
+        list_orders = cur.fetchall()
+
+    elif (date != None and status != None) and cedula == None:
+        cur.execute(
+            "SELECT * FROM Pedido WHERE fecha_hora like %s AND status=%s",
+            (date + "%", status),
+        )
+        list_orders = cur.fetchall()
+
+    else:
+        cur.execute("SELECT * FROM Pedido")
+        list_orders = cur.fetchall()
+
+    cur.close()
+    con.close()
+    return jsonify(list_orders)
 
 
 if __name__ == "__main__":
